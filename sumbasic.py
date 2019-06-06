@@ -3,7 +3,7 @@ import operator
 from collections import Counter
 
 def sumbasic(doc, sum_length = 1):
-    """ Implementation of sumbasic text summarization algorithm. Picks representatitive sentences based on high word frequencies.
+    """ Implementation of sumbasic text summarization algorithm. Picks representative sentences based on high word frequencies.
 
     Args:
         doc (spacy.tokens.doc.Doc): spacy document to summarize
