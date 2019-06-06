@@ -38,6 +38,7 @@ def sumbasic(doc, sum_length = 1):
                 best_weight = weight
             
         summary.append(best_sent.text)
+        sum_count += 1
 
         for tok in best_sent:
             if not tok.is_punct and not tok.is_stop:
