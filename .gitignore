@@ -1,4 +1,5 @@
 Data
+spacy_relations.py
 *.ipynb
 *.p
 *.pyc

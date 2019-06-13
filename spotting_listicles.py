@@ -115,4 +115,4 @@ df.groupby(['isListicle', 'truthClass']).count()
 
 import re
 
-regex = "([0-9]+\..*?)"
+# regex = "([0-9]+\..*?)"
