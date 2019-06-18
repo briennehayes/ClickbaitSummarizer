@@ -124,5 +124,5 @@ def summarize(doc, num_sents):
         string: the document summary
     """
     ranked_sents = rate_sentences(doc)
-    sorted_sents = sorted(ranked_sents, key = itemgetter(1), reverse = True)
+    sorted_sents = [sent for (sent, rank) in sorted(ranked_sents, key = itemgetter(1), reverse = True)]
     return " ".join(sorted_sents[:num_sents])
