@@ -42,10 +42,15 @@ def retokenize_ents(doc):
     subtract_length = 0 # offset from previous retokenized span
     with doc.retokenize() as retokenizer:
         for span in spans:
+            ent_types = []
             for tok in span:
                 mapping[tok.i] = span.start - subtract_length
+                ent_types.append(tok.ent_type)
+            # exact ent type doesn't matter, we just want to preserve whether any 
+            # constituent tokens were originally named ents
+            attrs = {"ENT_TYPE": max(ent_types)}
             subtract_length += len(span) - 1
-            retokenizer.merge(span)
+            retokenizer.merge(span, attrs = attrs)
     return mapping
 
 def match_title_ents(title, doc):
@@ -58,7 +63,7 @@ def match_title_ents(title, doc):
     Returns:
         dict: keys are entities from the article title, values are lists of possible matches in the article body
     """ 
-    doc_lemmas = [tok.lemma_ for tok in doc] # look at lemmas since exact form of target root might not be used
+    doc_lemmas = [tok.lemma_.lower() for tok in doc] # look at lemmas since exact form of target root might not be used
     retok = Doc(doc.vocab).from_bytes(doc.to_bytes()) # don't want to overwrite tokenization of original document
     mapping = retokenize_ents(retok)
     matched = {}
