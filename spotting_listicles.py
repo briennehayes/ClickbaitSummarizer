@@ -86,24 +86,6 @@ def set_custom_boundaries(doc):
 nlp.remove_pipe('set_custom_boundaries')
 nlp.add_pipe(set_custom_boundaries, before="parser")
 
-def strip_the_list(title):
-    """ Removes "The list" from the end of an article title
-
-    Args:
-        title (string): an article title
-
-    Returns:
-        string: the article title with "The list" removed from the end
-    """
-    if len(title) > 8:
-        if title[-8:] == "The list":
-            return title[:-8].strip()
-    return title
-
-# many article titles end with a reference to the site "The list" which throws off the listicle flagging rules
-# fortunately, consistent formatting makes it easy to get rid of these
-df['targetTitle'] = df['targetTitle'].apply(strip_the_list)
-
 df['titleDoc'] = list(nlp.pipe(df['targetTitle']))
 
 df['isListicle'] = df['titleDoc'].apply(is_listicle)

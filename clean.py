@@ -20,6 +20,8 @@ with jl.open('truth.jsonl') as reader:
         for label in col_labels:
             df.at[row_label, label] = obj[label]
 
+# The clickbait corpus is German in origin, so some unicode irregularities need to be taken care of
+
 import unicodedata
 import re
 
@@ -41,4 +43,15 @@ def clean_paragraphs(ps):
 df['postText'] = df['postText'].apply(clean_postText)
 df['targetKeywords'] = df['targetKeywords'].apply(clean_keywords)
 df['targetParagraphs'] = df['targetParagraphs'].apply(clean_paragraphs)
-df['targetTitle'] = df['targetTitle'].apply(unicode_normalize) # no further processing needed on titles
+df['targetTitle'] = df['targetTitle'].apply(unicode_normalize)
+
+# many article titles end with a reference to the sitename "The list" 
+# fortunately, consistent formatting makes it easy to get rid of these
+
+def strip_the_list(title):
+    if len(title) > 8:
+        if title[-8:] == "The list":
+            return title[:-8].strip()
+    return title
+
+df['targetTitle'] = df['targetTitle'].apply(strip_the_list)
