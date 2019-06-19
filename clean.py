@@ -4,7 +4,7 @@
 import jsonlines as jl
 import pandas as pd
 
-with jl.open('instances.jsonl') as reader:
+with jl.open('Data/instances.jsonl') as reader:
     df = pd.DataFrame()
     for obj in reader:
         df = df.append(obj, ignore_index = True)
@@ -14,7 +14,7 @@ col_labels = ['truthJudgments', 'truthMean', 'truthMedian', 'truthMode', 'truthC
 for label in col_labels:
     df[label] = None
 
-with jl.open('truth.jsonl') as reader:
+with jl.open('Data/truth.jsonl') as reader:
     for obj in reader:
         row_label = str(obj['id'])
         for label in col_labels:
@@ -54,8 +54,11 @@ def strip_endmatter(paragraphs):
     # the intuition is that content-less endmatter won't be properly punctuated most of the time
     regex = re.compile("[\.\?!\"'’”]$") # sentence-final punctuation
     open_ended = [bool(regex.findall(p)) for p in paragraphs]
-    open_ended.reverse()
-    return paragraphs[:len(paragraphs) - open_ended.index(True)]
+    # somehow, there are articles that don't have a single punctuated paragraph
+    if any(open_ended):
+        open_ended.reverse()
+        return paragraphs[:len(paragraphs) - open_ended.index(True)]
+    return paragraphs
 
 def clean_paragraphs(ps):
     normalized = [unicode_normalize(p) for p in ps] # normalize unicode
@@ -77,3 +80,9 @@ def strip_the_list(title):
     return title
 
 df['targetTitle'] = df['targetTitle'].apply(strip_the_list)
+
+# dump the cleaned corpus as a pickled file for easy access later
+
+import pickle
+
+pickle.dump(df, open("clickbait.p", "wb"))
