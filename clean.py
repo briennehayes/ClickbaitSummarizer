@@ -1,4 +1,4 @@
-""" Read in clickbait corpus data, combine with truth labels, clean up text, and process with spaCy 
+""" Read in clickbait corpus data, combine with truth labels, clean up text. 
 """
 
 import jsonlines as jl
@@ -23,31 +23,22 @@ with jl.open('truth.jsonl') as reader:
 import unicodedata
 import re
 
-def clean_postText(post):
-    text = unicodedata.normalize("NFKD", "".join(post).replace("\xad", "")) # unlist the paragraphs and remove unicode
+def unicode_normalize(string):
+    text = unicodedata.normalize("NFKD", string.replace("\xad", "")) # unlist the paragraphs and remove unicode
     text = re.sub(' +', ' ', text) # strip out any excess spaces
     return text
+
+def clean_postText(post):
+    return unicode_normalize("".join(post)) # mostly to unlist the single post text
 
 def clean_keywords(kws):
     return [string.strip() for string in kws.split(",")]
 
 def clean_paragraphs(ps):
-    text = unicodedata.normalize("NFKD", " ".join(ps).replace("\xad", "")) # unlist the paragraphs and remove unicode
-    text = re.sub(' +', ' ', text) # strip out any excess spaces
-    return text
-
-def clean_titles(title):
-    text = unicodedata.normalize("NFKD", title.replace("\xad", "")) # unlist the paragraphs and remove unicode
-    text = re.sub(' +', ' ', text) # strip out any excess spaces
-    return text
+    # paragraphs are given as lists of strings, so join them with newline character
+    return unicode_normalize("\n".join(ps)) 
 
 df['postText'] = df['postText'].apply(clean_postText)
 df['targetKeywords'] = df['targetKeywords'].apply(clean_keywords)
 df['targetParagraphs'] = df['targetParagraphs'].apply(clean_paragraphs)
-df['targetTitle'] = df['targetTitle'].apply(clean_titles)
-
-import spacy
-nlp = spacy.load('en_core_web_sm')
-
-df['postTextDoc'] = list(nlp.pipe(df['postText']))
-df['paragraphsDoc'] = list(nlp.pipe(df['targetParagraphs']))
+df['targetTitle'] = df['targetTitle'].apply(unicode_normalize) # no further processing needed on titles
