@@ -78,10 +78,14 @@ def match_title_ents(title, doc):
             if target_root.lemma_ in sent_lemmas:
                 # print("ROOT FOUND IN SENTENCE:", sent)
                 # locate the retokenized token that contains the target root
-                pos = mapping[doc_lemmas.index(target_root.lemma_, sent.start, sent.end)]
-                target_phrase = retok[pos]
-                # print("TARGET PHRASE:", target_phrase)
-                match = None
+                idx = doc_lemmas.index(target_root.lemma_, sent.start, sent.end)
+                if idx in mapping:
+                    pos = mapping[idx]
+                    target_phrase = retok[pos]
+                    match = None
+                    # print("TARGET PHRASE:", target_phrase)
+                else:
+                    match = "?"
                 while not match:
                     if target_phrase.ent_type:
                         match = target_phrase
