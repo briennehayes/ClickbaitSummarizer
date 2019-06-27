@@ -55,3 +55,14 @@ ents <- stats %>%
 
 ggplot(ents, aes(x = numNamedEntities, y = proportion)) +   
   geom_bar(aes(fill = truthClass), position = "dodge", stat="identity")
+
+sums <- stats %>%
+  select(truthClass, listicle, leadsWithQuestion, hasDeterminer, superlative, accusatory) %>%
+  mutate(sum = rowSums(.[2:6])) %>%
+  group_by(truthClass) %>%
+  count(sum) %>%
+  add_tally() %>%
+  mutate(proportion = n / nn)
+
+ggplot(sums, aes(x = sum, y = proportion)) +   
+  geom_bar(aes(fill = truthClass), position = "dodge", stat="identity")
