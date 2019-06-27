@@ -79,6 +79,7 @@ def match_title_ents(title, doc):
                 # print("ROOT FOUND IN SENTENCE:", sent)
                 # locate the retokenized token that contains the target root
                 idx = doc_lemmas.index(target_root.lemma_, sent.start, sent.end)
+                # I guess it's possible for target root to not be part of a noun chunk (somehow???)
                 if idx in mapping:
                     pos = mapping[idx]
                     target_phrase = retok[pos]

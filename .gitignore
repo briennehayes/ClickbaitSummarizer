@@ -4,3 +4,7 @@ spacy_relations.py
 *.p
 *.pyc
 *.csv
+.Rproj.user
+*.Rhistory
+*.xlsx
+*.Rproj
