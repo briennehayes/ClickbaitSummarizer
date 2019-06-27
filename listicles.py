@@ -1,9 +1,3 @@
-import pickle
-df = pickle.load(open("cleaned_corpus.p", "rb"))
-
-import spacy
-nlp = spacy.load('en_core_web_sm')
-
 def is_small_number(tok, thresh = 1000):
     """ Determines whether a token represents a "small" number (digit).
 
@@ -68,30 +62,6 @@ def is_listicle(doc):
             except IndexError:
                 pass
     return False
-
-def set_custom_boundaries(doc):
-    """ Defines the colon as a sentence boundary.
-
-    Args:
-        doc (spacy.tokens.doc.Doc): a spaCy document
-
-    Returns:
-        spacy.tokens.doc.Doc: the spaCy document with updated sentence boundaries
-    """
-    for token in doc[:-1]:
-        if token.text == ":":
-            doc[token.i+1].is_sent_start = True
-    return doc
-
-nlp.remove_pipe('set_custom_boundaries')
-nlp.add_pipe(set_custom_boundaries, before="parser")
-
-df['titleDoc'] = list(nlp.pipe(df['targetTitle']))
-
-df['isListicle'] = df['titleDoc'].apply(is_listicle)
-
-# check the distribution of listicles in the dataset
-df.groupby(['isListicle', 'truthClass']).count()
 
 # Extracting list items from listicles
 
