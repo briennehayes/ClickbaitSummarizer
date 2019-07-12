@@ -5,7 +5,7 @@ nlp = spacy.load('en_core_web_lg')
 import pandas as pd
 import pickle
 
-df = pickle.load(open("Data\clickbait.p", "rb"))
+df = pickle.load(open("Data/clickbait.p", "rb"))
 docs = pickle.load(open("Data/title_docs.p", "rb"))
 
 df = df.merge(docs, left_index = True, right_index = True)
