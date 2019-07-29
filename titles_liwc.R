@@ -16,6 +16,13 @@ truth <- read.csv("Results/truth_values.csv")
 data <- merge(truth, stats, by = "id") %>%
   gather(key = "dim", value = "value", WC:OtherP)
 
+corr <- data %>%
+  group_by(dim) %>%
+  summarise(
+    meanCorr = cor(truthMean, value),
+    medCorr = cor(truthMedian, value)
+  )
+
 avgs <- data %>%
   group_by(truthClass, dim) %>%
   summarise(mean = mean(value)) 
@@ -61,6 +68,15 @@ num_data <- merge(truth, nums, by = "id") %>%
   mutate(truthClass = revalue(truthClass, c('no-clickbait' = 'not clickbait'))) %>%
   group_by(truthClass, dim) %>%
   summarise(proportion = sum(value) / n())
+
+num_corr <- merge(truth, nums, by = "id") %>%
+  gather(key = "dim", value = "value", startsWithNum:isListicle) %>%
+  mutate(value = as.numeric(value)) %>%
+  group_by(dim) %>%
+  summarise(
+    meanCorr = cor(truthMean, value),
+    medCorr = cor(truthMedian, value)
+  )
 
 g <- ggplot(num_data, aes(x = truthClass, y = proportion, fill = truthClass)) +
   geom_bar(stat = "identity") +
@@ -136,3 +152,9 @@ g <- ggplot(eng2, aes(x = truthClass, y = mean, fill = truthClass)) +
 
 ggsave("engagePlot.png", plot = g, width = 4.5, height = 4, units = "in")
 
+
+plot_data <- data %>%
+  filter(dim %in% c('ipron', 'ppron'))
+
+ggplot(plot_data, aes(x = truthMedian, y = value)) +
+  geom_violin()

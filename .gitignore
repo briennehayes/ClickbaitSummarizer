@@ -9,3 +9,4 @@ spacy_relations.py
 *.Rhistory
 *.xlsx
 *.Rproj
+*.png
