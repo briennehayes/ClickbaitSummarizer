@@ -2,33 +2,89 @@ library(plyr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(showtext)
+library(extrafont)
 
-font_add_google("Lato", "lato")
-showtext_auto() 
+font_import(pattern="cmunss")
+loadfonts(device = "win")
 
 stats <- read.csv("Results/title_stats.csv")
 stats <- stats[-c(1), ]
 colnames(stats)[1] <- 'id'
 colnames(stats)[2] <- 'source'
 truth <- read.csv("Results/truth_values.csv")
+nums <- read.csv("Results/num_stats.csv")
+nums <- within(nums, startsWithNum <- factor(startsWithNum, labels = c(0, 1)))
+nums <- within(nums, isListicle <- factor(isListicle, labels = c(0, 1)))
 
 data <- merge(truth, stats, by = "id") %>%
-  gather(key = "dim", value = "value", WC:OtherP)
+  mutate(NonAnalytic = 100 - Analytic) %>%
+  merge(nums, by = "id") %>%
+  gather(key = "dim", value = "value", WC:isListicle) %>%
+  mutate(value = as.numeric(value)) %>%
+  filter(dim %in% c('ipron', 'ppron', 'adverb', 'article',
+                    'number', 'startsWithNum', 'isListicle',
+                    'you', 'interrog', 'NonAnalytic')) %>%
+  mutate(dim = revalue(dim, c('ipron' = 'Indefinite Pronouns',
+                              'ppron' = 'Personal Pronouns',
+                              'adverb' = 'Adverbs',
+                              'article' = 'Articles',
+                              'number' = 'Numerals',
+                              'startsWithNum' = '# Initial',
+                              'isListicle' = 'Listicle',
+                              'you' = '2nd Person Pronouns', 
+                              'interrog' = 'Interrogatives',
+                              'NonAnalytic' = 'Non-Analytic Words')))
 
 corr <- data %>%
   group_by(dim) %>%
   summarise(
-    meanCorr = cor(truthMean, value),
-    medCorr = cor(truthMedian, value)
+    meanCorr = cor.test(truthMean, value)$estimate,
+    meanCorrP = cor.test(truthMean, value)$p.value,
+    medCorr = cor.test(truthMedian, value)$estimate,
+    medCorrP = cor.test(truthMedian, value)$p.value
   )
 
 avgs <- data %>%
   group_by(truthClass, dim) %>%
-  summarise(mean = mean(value)) 
-  # it errors when I try to replace clickbait labels here???
+  summarise(mean = mean(value)) %>%
+  ungroup() %>%
+  mutate(truthClass = revalue(truthClass, c('no-clickbait' = 'not clickbait')))
 
-# Plotting Curiosity Gap
+data1 <- avgs %>%
+  filter(dim %in% c('2nd Person Pronouns', 'Adverbs', 'Articles', 'Indefinite Pronouns',
+                    'Interrogatives', 'Numerals', 'Personal Pronouns'))
+
+data2 <- avgs %>%
+  filter(dim %in% c('# Initial', 'Listicle'))
+
+data3 <- avgs %>%
+  filter(dim %in% 'Non-Analytic Words')
+
+plot1 <- ggplot(data1, aes(x = truthClass, y = mean, fill = truthClass)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~dim) +
+  labs(x = "", y = "Mean % of Words in Dictionary") +
+  scale_fill_manual(values=c("#696969", "#C0C0C0")) +
+  guides(fill=guide_legend(title="")) +
+  theme_minimal() +
+  theme(
+    legend.position = c(0.85, 0.15), # c(0,0) bottom left, c(1,1) top-right.
+    legend.background = element_rect(fill = "white", colour = NA, size = 2),
+    legend.key.size = unit(1, "cm"),
+    axis.text.x=element_blank(),
+    text=element_text(size=8,  family="CMU Sans Serif")
+  ) 
+
+# ggsave("plot1.png", plot = plot1, width = 3, height = 3, units = "in")
+
+##################################
+# Poster Plots
+##################################
+
+library(showtext)
+
+font_add_google("Lato", "lato")
+showtext_auto()
 
 cgap <- avgs %>%
   ungroup() %>%
@@ -152,9 +208,6 @@ g <- ggplot(eng2, aes(x = truthClass, y = mean, fill = truthClass)) +
 
 ggsave("engagePlot.png", plot = g, width = 4.5, height = 4, units = "in")
 
-
 plot_data <- data %>%
   filter(dim %in% c('ipron', 'ppron'))
 
-ggplot(plot_data, aes(x = truthMedian, y = value)) +
-  geom_violin()
