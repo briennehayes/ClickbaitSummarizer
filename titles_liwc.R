@@ -75,7 +75,38 @@ plot1 <- ggplot(data1, aes(x = truthClass, y = mean, fill = truthClass)) +
     text=element_text(size=8,  family="CMU Sans Serif")
   ) 
 
-# ggsave("plot1.png", plot = plot1, width = 3, height = 3, units = "in")
+plot2 <- ggplot(data2, aes(x = truthClass, y = mean, fill = truthClass)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~dim) +
+  labs(x = "", y = "Proportion of Headlines with Feature") +
+  scale_fill_manual(values=c("#696969", "#C0C0C0")) +
+  guides(fill=FALSE) +
+  theme_minimal() +
+  theme(
+    legend.position = c(0.85, 0.15), # c(0,0) bottom left, c(1,1) top-right.
+    legend.background = element_rect(fill = "white", colour = NA, size = 2),
+    legend.key.size = unit(1, "cm"),
+    axis.text.x=element_blank(),
+    text=element_text(size=8,  family="CMU Sans Serif")
+  ) 
+
+plot3 <- ggplot(data3, aes(x = truthClass, y = mean, fill = truthClass)) +
+  geom_bar(stat = "identity") +
+  labs(x = "", y = "Mean % of Non-Analytic Words") +
+  scale_fill_manual(values=c("#696969", "#C0C0C0")) +
+  guides(fill=FALSE) +
+  theme_minimal() +
+  theme(
+    legend.position = c(0.85, 0.15), # c(0,0) bottom left, c(1,1) top-right.
+    legend.background = element_rect(fill = "white", colour = NA, size = 2),
+    legend.key.size = unit(1, "cm"),
+    axis.text.x=element_blank(),
+    text=element_text(size=8,  family="CMU Sans Serif")
+  ) 
+
+ggsave("plot1.png", plot = plot1, width = 3, height = 3, units = "in")
+ggsave("plot2.png", plot = plot2, width = 3, height = 3, units = "in")
+ggsave("plot3.png", plot = plot3, width = 3, height = 3, units = "in")
 
 ##################################
 # Poster Plots
